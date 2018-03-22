@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar 20 11:35:28 2018
-
-@author: emilywilkins
 """
+# Code from https://github.com/sorlovsky/trump-stock/blob/7ab8388674723d450ba5e82312ea1d068286839f/old/tw_dumper.py
 
 # Grap multiple user's user_timeline from twitter API and save to Excel
 # Code will be save user's tweet ID, created Time, Coordinates-x, Coordinates-y, source, text. 
