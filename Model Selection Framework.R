@@ -35,15 +35,14 @@ scaff$stdburningman<-stdize(scaff$BurningMan)
 ## Lets make our model using the different paramater combinations
 
 library(MASS)
-attach(scaff)
 ## M1 we will use all the variables
-M1<-glm.nb(JOTR_all~stdcci+stdlapop+stdcochella+stdgas+stdburningman)
+M1<-glm.nb(JOTR_all~stdcci+stdlapop+stdcochella+stdgas+stdburningman, data=scaff)
 ## M2 let's remove the google search variables
-M2<-glm.nb(JOTR_all~stdcci+stdlapop+stdgas)
+M2<-glm.nb(JOTR_all~stdcci+stdlapop+stdgas, data=scaff)
 ## M3 lets use ONLY the google search terms
-M3<-glm.nb(JOTR_all~stdcochella+stdburningman)
+M3<-glm.nb(JOTR_all~stdcochella+stdburningman, data=scaff)
 ## M4 lets use ONLY the economic variables
-M4<-glm.nb(JOTR_all~stdcci+stdgas)
+M4<-glm.nb(JOTR_all~stdcci+stdgas, data=scaff)
 
 ## Let's use LOOCV to evaluate each of the models
 ## First create an empty vector to fill with using a loop
@@ -54,7 +53,7 @@ leftout<-rep(NA,times=length(scaff$JOTR_all))
 
 for(i in 1:length(scaff$JOTR_all)){
   sub_dat<-scaff[-i,]
-  m_sub<-M1
+  m_sub<-glm.nb(JOTR_all~stdcci+stdlapop+stdcochella+stdgas+stdburningman, data=sub_dat)
   leftout[i]=predict(m_sub,newdat=scaff[i,]) 
 }
 
@@ -72,9 +71,9 @@ rmseM1<-rmse(leftout,scaff$JOTR_all)
 leftout2<-rep(NA,times=length(scaff$JOTR_all))
 
 for(i in 1:length(scaff$JOTR_all)){
-  sub_dat<-scaff[-i,]
-  m_sub<-M2
-  leftout2[i]=predict(m_sub,newdat=scaff[i,]) 
+  sub_dat2<-scaff[-i,]
+  m_sub2<-glm.nb(JOTR_all~stdcci+stdlapop+stdgas, data=sub_dat2)
+  leftout2[i]=predict(m_sub2,newdat=scaff[i,]) 
 }
 
 R2M2<-R2(leftout2,scaff$JOTR_all)
@@ -84,9 +83,9 @@ rmseM2<-rmse(leftout2,scaff$JOTR_all)
 leftout3<-rep(NA,times=length(scaff$JOTR_all))
 
 for(i in 1:length(scaff$JOTR_all)){
-  sub_dat<-scaff[-i,]
-  m_sub<-M3
-  leftout3[i]=predict(m_sub,newdat=scaff[i,]) 
+  sub_dat3<-scaff[-i,]
+  m_sub3<-glm.nb(JOTR_all~stdcochella+stdburningman, data=sub_dat3)
+  leftout3[i]=predict(m_sub3,newdat=scaff[i,]) 
 }
 
 R2M3<-R2(leftout3,scaff$JOTR_all)
@@ -96,9 +95,9 @@ rmseM3<-rmse(leftout3,scaff$JOTR_all)
 leftout4<-rep(NA,times=length(scaff$JOTR_all))
 
 for(i in 1:length(scaff$JOTR_all)){
-  sub_dat<-scaff[-i,]
-  m_sub<-M4
-  leftout4[i]=predict(m_sub,newdat=scaff[i,]) 
+  sub_dat4<-scaff[-i,]
+  m_sub4<-glm.nb(JOTR_all~stdcci+stdgas, data=sub_dat4)
+  leftout4[i]=predict(m_sub4,newdat=scaff[i,]) 
 }
 
 R2M4<-R2(leftout4,scaff$JOTR_all)
@@ -113,14 +112,14 @@ rmseM4<-rmse(leftout4,scaff$JOTR_all)
 
  ## Lets do one more looking at the
  ## most significant variables
- M5<-glm.nb(JOTR_all~stdcci+stdcochella+stdgas)
+ M5<-glm.nb(JOTR_all~stdcci+stdcochella+stdgas, data=scaff)
  
  leftout5<-rep(NA,times=length(scaff$JOTR_all))
  
  for(i in 1:length(scaff$JOTR_all)){
-   sub_dat<-scaff[-i,]
-   m_sub<-M5
-   leftout5[i]=predict(m_sub,newdat=scaff[i,]) 
+   sub_dat5<-scaff[-i,]
+   m_sub5<-glm.nb(JOTR_all~stdcci+stdcochella+stdgas, data=sub_dat5)
+   leftout5[i]=predict(m_sub5,newdat=scaff[i,]) 
  }
  
  R2M5<-R2(leftout5,scaff$JOTR_all)
