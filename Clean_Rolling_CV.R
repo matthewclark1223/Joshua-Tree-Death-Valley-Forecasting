@@ -1,3 +1,8 @@
+#This code is from a project I recently submitted for review in the Journal of Environmental Management.
+#This code creates hierarchical Bayesian models to predict visitation in US National Parks
+#I use a block cross validation technique determine the accuracy of both models.
+#I also create csvs with the error metric for both models
+
 Parks<-read_csv("~/ParkBreak/Block cross model-code-data/Parks_Monthly - Sheet1 (3).csv")
 Parks$Year<-as.numeric(format(Parks$Date,"%Y"))
 df<-Parks %>%
@@ -19,12 +24,12 @@ Dat2017<-df[df$Year==2017,]
 options(mc.cores=4)
 
 #Google First
-GLMall<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=8,data=df)
-GLM2013<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=8,data=df[df$Year != 2013:2017,])
-GLM2014<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=8,data=df[df$Year != 2014:2017,])
-GLM2015<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=8,data=df[df$Year != 2015:2017,])
-GLM2016<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=8,data=df[df$Year != 2016:2017,])
-GLM2017<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=8,data=df[df$Year != 2017,])
+GLMall<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=12,data=df)
+GLM2013<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=12,data=df[df$Year != 2013:2017,])
+GLM2014<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=12,data=df[df$Year != 2014:2017,])
+GLM2015<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=12,data=df[df$Year != 2015:2017,])
+GLM2016<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=12,data=df[df$Year != 2016:2017,])
+GLM2017<-stan_glmer.nb(Visitation~Lag12G+(Lag12G|Park),chains=12,data=df[df$Year != 2017,])
 save(GLMall,file= "GLMall.rda")
 save(GLM2013,file= "GLM2013.rda")
 save(GLM2014,file= "GLM2014.rda")
@@ -52,9 +57,12 @@ load(file="./GLM2014.rda")
 load(file="./GLM2015.rda")
 load(file="./GLM2016.rda")
 load(file="./GLM2017.rda")
+
+#Create dataframes with the predictions for each year informed by models from the previous years
+# Predictions include median, and 50% credibility interval and 25% credibility interval
 GLMpost2013=posterior_predict(GLM2013,Dat2013, draws=2000) 
 for(i in 1:ncol(GLMpost2013)){
-  GLMRes2013[i,1]=quantile(GLMpost2013[,i],0.5)
+  GLMRes2013[i,1]=quantile(GLMpost2013[,i],0.5) 
   GLMRes2013[i,2]=quantile(GLMpost2013[,i],0.375)
   GLMRes2013[i,3]=quantile(GLMpost2013[,i],0.25)
   GLMRes2013[i,4]=quantile(GLMpost2013[,i],0.625)
@@ -222,7 +230,7 @@ Full_AR5_Results<-rbind(AR5Res2013,AR5Res2014,AR5Res2015,AR5Res2016,AR5Res2017)
 write.csv(Full_AR5_Results, file = "Full_AR5_Results.csv")
 
 
-#Now let's compare some overall metrics
+#Now let's compare some overall error metrics to see which model is "better"
 R2 <- function (x, y) cor(x, y) ^ 2
 library(Metrics)
 
@@ -241,6 +249,9 @@ AR_errors<- Full_AR5_Results %>%
             MAEAR=mae(Median,Visitation))
 
 AR_errors$Park<-NULL
+options(scipen = 1000000)
 Error_Metrics<-cbind(GL_errors,AR_errors)
+
+
 
 
